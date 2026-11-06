@@ -1,0 +1,194 @@
+{
+  "info": {
+    "name": "GMPE — local sales transaction",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:4301"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirm a partially paid sale",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/sales",
+        "header": [
+          {
+            "key": "X-Demo-Shop",
+            "value": "demo-a"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reference\": \"sample-sale\", \"receivedCents\": 10000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Retry the same sale",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/sales",
+        "header": [
+          {
+            "key": "X-Demo-Shop",
+            "value": "demo-a"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reference\": \"sample-sale\", \"receivedCents\": 10000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject sale when stock is depleted",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/sales",
+        "header": [
+          {
+            "key": "X-Demo-Shop",
+            "value": "demo-a"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reference\": \"another-sale\", \"receivedCents\": 10000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reconcile shop A",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/shop",
+        "header": [
+          {
+            "key": "X-Demo-Shop",
+            "value": "demo-a"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Cash, stock, and receivable match', () => { const x = pm.response.json(); pm.expect([x.available, x.cashCents, x.receivableCents]).to.eql([0, 10000, 20000]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check isolation from shop A",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/shop",
+        "header": [
+          {
+            "key": "X-Demo-Shop",
+            "value": "demo-b"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Shop B is unaffected', () => { const x = pm.response.json(); pm.expect([x.available, x.cashCents, x.receivableCents]).to.eql([1, 0, 0]); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

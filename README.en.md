@@ -4,9 +4,21 @@
 
 [Português](README.md) · **English**
 
+[![CI](https://github.com/acamilateixeira/gmpe/actions/workflows/ci.yml/badge.svg)](https://github.com/acamilateixeira/gmpe/actions/workflows/ci.yml)
+
 **Management for Micro and Small Businesses.** GMPE is a product concept for small retailers that sell physical goods and receive some payments after the sale. The first release aims to link each sale to inventory, cash received, and the remaining balance.
 
-**Project status:** planning. This repository contains the product and architecture proposal. The application and demo are planned deliverables.
+**Project status:** runnable local sales demo and proposed product architecture.
+
+## Run the sales demo
+
+Use PHP 8.4 with PDO SQLite. In one terminal, start the local API with a temporary database.
+
+```bash
+GMPE_DEMO_DB="$(mktemp)" php -S 127.0.0.1:4301 demo/router.php
+```
+
+In another terminal, run `php demo/test.php` or import the [Postman collection](docs/postman.collection.json) into Postman or Insomnia. Start with a fresh database for each run. The sequence confirms a BRL 300 sale with BRL 100 received, verifies retry behavior, rejects another sale when stock is gone, and checks the second shop stayed isolated. The demo uses two fictional shops, local keys, and PHP/SQLite. The Laravel app, authenticated sessions, and PostgreSQL concurrency checks are part of the proposed architecture.
 
 ## The problem
 

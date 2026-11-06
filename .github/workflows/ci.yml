@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite
+          coverage: none
+      - name: Verify the sales demo
+        run: |
+          demo_db="$(mktemp)"
+          GMPE_DEMO_DB="$demo_db" php -S 127.0.0.1:4301 demo/router.php &
+          server_pid=$!
+          trap 'kill "$server_pid"; rm -f "$demo_db"' EXIT
+          curl --fail --silent --retry 10 --retry-connrefused http://127.0.0.1:4301/health
+          php demo/test.php

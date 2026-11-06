@@ -4,9 +4,21 @@
 
 **Português** · [English](README.en.md)
 
+[![CI](https://github.com/acamilateixeira/gmpe/actions/workflows/ci.yml/badge.svg)](https://github.com/acamilateixeira/gmpe/actions/workflows/ci.yml)
+
 **Gestão de Micro e Pequenas Empresas.** O GMPE é uma proposta de produto para pequenas lojas que vendem mercadorias e recebem parte das vendas a prazo. A primeira versão pretende conectar cada venda ao estoque, ao caixa e ao que ainda falta receber.
 
-**Estado do projeto:** planejamento. O repositório contém a proposta de produto e de arquitetura. A aplicação e a demo são entregas futuras.
+**Estado do projeto:** demo local da regra de venda e arquitetura proposta para o produto.
+
+## Rodar a demo de venda
+
+Use PHP 8.4 com PDO SQLite. Em um terminal, inicie a API local com banco temporário.
+
+```bash
+GMPE_DEMO_DB="$(mktemp)" php -S 127.0.0.1:4301 demo/router.php
+```
+
+Em outro terminal, rode `php demo/test.php` ou importe a [coleção Postman](docs/postman.collection.json) no Postman ou Insomnia. Use um banco novo para cada execução da sequência. Ela confirma uma venda de R$ 300 com R$ 100 recebidos, verifica a repetição do pedido, recusa outra venda sem estoque e confere que a segunda loja ficou intacta. A demo usa duas lojas fictícias, chaves locais e PHP/SQLite. A aplicação Laravel, as sessões de usuário e a verificação de concorrência em PostgreSQL pertencem à arquitetura proposta.
 
 ## O problema
 
